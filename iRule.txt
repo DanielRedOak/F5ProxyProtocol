@@ -1,0 +1,28 @@
+when CLIENT_ACCEPTED { 
+ TCP::collect
+}
+
+when CLIENT_DATA {
+
+  if { [TCP::payload] != ""} {
+    log local0. "Have access to TCP::Payload"
+    
+    ##assemble the payload
+    set sip [IP::client_addr]
+    set sport [TCP::client_port]
+    set dip [IP::local_addr clientside]
+    set dport [TCP::local_port clientside]
+
+    set new_payload "PROXY TCP4 $sip $dip $sport $dport [TCP::payload]"
+    log local0. "Old payload: [TCP::payload]" 
+    log local0. "New payload: $new_payload"
+
+    set og_tcp_len [TCP::payload length]
+    set new_tcp_len [string length $new_payload]
+    log local0. "Payload length: $new_tcp_len"
+    TCP::payload replace 0 [TCP::payload length] $new_payload
+
+    TCP::release
+    TCP::collect
+  }
+}
