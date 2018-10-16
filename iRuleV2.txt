@@ -1,0 +1,7 @@
+when CLIENT_ACCEPTED {
+    set proxyheader "PROXY TCP[IP::version] [getfield [IP::client_addr] "%" 1] [getfield [IP::local_addr clientside] "%" 1] [TCP::remote_port] [TCP::local_port]\r\n"
+}
+
+when SERVER_CONNECTED {
+    TCP::respond $proxyheader
+}
